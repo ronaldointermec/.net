@@ -26,3 +26,4 @@ C:\Users\E841371\Documents\Projetos\.net\api\obj\Debug\net9.0\refint\api.dll
 C:\Users\E841371\Documents\Projetos\.net\api\obj\Debug\net9.0\api.pdb
 C:\Users\E841371\Documents\Projetos\.net\api\obj\Debug\net9.0\api.genruntimeconfig.cache
 C:\Users\E841371\Documents\Projetos\.net\api\obj\Debug\net9.0\ref\api.dll
+C:\Users\E841371\Documents\Projetos\.net\api\obj\Debug\net9.0\api.sourcelink.json

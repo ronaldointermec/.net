@@ -49,6 +49,9 @@ app.MapDelete("/product/{code}", ( [FromRoute] string code)  => {
 });
 
 
+app.MapGet("/configuration/database" ,(IConfiguration configuraton) => {
+    return Results.Ok(configuraton["database:port"]);
+});
 app.Run();
 
 

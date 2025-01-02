@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuração do serviço
+builder.Services.AddDbContext<ApplicationDBContext>();
+
 var app = builder.Build();
 var configuration = app.Configuration;
 ProductRepository.Init(configuration);
@@ -66,7 +70,7 @@ app.MapDelete("/product/{code}", ([FromRoute] string code) =>
 });
 
 
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
     app.MapGet("/configuration/database", (IConfiguration configuraton) =>
     {
         return Results.Ok(
@@ -110,14 +114,41 @@ public static class ProductRepository
     }
 }
 
-
-public class Product
+public class Category
 {
-    public string? Code { get; set; }
+    public int Id { get; set; }
     public string? Name { get; set; }
 }
 
+public class Product
+{
+    public int Id { get; set; }
+    public string? Code { get; set; }
+    public string? Name { get; set; }
+    public string Description { get; set; }
+    public Category Category { get; set; }
+}
 
-public class ApplicationDBContext : DbContext{
+
+public class ApplicationDBContext : DbContext
+{
+    public DbSet<Product> Products { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.Entity<Product>()
+        .Property(p => p.Description).HasMaxLength(500).IsRequired(false);
+
+        builder.Entity<Product>()
+        .Property(p => p.Name).HasMaxLength(120).IsRequired();
+
+        builder.Entity<Product>()
+        .Property(p => p.Code).HasMaxLength(20).IsRequired();
+
+
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+        => options.UseSqlServer("Server=localhost;Database=Products;User Id=sa;Password=Bruna#@1;MultipleActiveResultSets=true;Encrypt=YES;TrustServerCertificate=YES");
 
 }

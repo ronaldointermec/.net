@@ -1,0 +1,26 @@
+// Baixa a imagem do sql 
+docker pull mcr.microsoft.com/mssql/server:2019-latest
+
+// Cria o container
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Bruna#@1" -p 1433:1433 --name sqlserver -h sql1 -d e483dcbe7ede
+
+// pacotes necessário para trabalhar com o banco de dados 
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+
+// CLI para migration
+dotnet tool install --global dotnet-ef
+
+// Cria migration 
+dotnet ef migrations add CreateProduct
+
+// Executa a migration 
+dotnet ef database update
+
+// Remove a última migration 
+dotnet ef migrations remove
+
+// Executa uma migration específica 
+dotnet ef database update 20250101231855_CreateProduct

@@ -1,39 +1,31 @@
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuração do serviço
-builder.Services.AddDbContext<ApplicationDBContext>();
+builder.Services.AddSqlServer<ApplicationDBContext>(builder.Configuration["Database:SqlServer"]);
 
 var app = builder.Build();
 var configuration = app.Configuration;
 ProductRepository.Init(configuration);
 
-app.MapGet("/user", () => new { Name = "Ronaldo Silva", Age = 44 });
-
-
-app.MapGet("/addheader", (HttpResponse response) =>
-{
-    response.Headers["Teste"] = "Ronaldo Silva"; // This will replace the value if it already exists
-    return new { Name = "Ronaldo Silva", Age = 44 };
-});
-
-app.MapPost("/product", (Product product) =>
+app.MapPost("/product", (ProductRequest productRequest, ApplicationDBContext context) =>
 {
 
-    ProductRepository.Add(product);
-    return Results.Created("/product" + product.Code, product.Code);
+    var category = context.Category.Where(c => c.Id == productRequest.CategoryId);
+    var product = new Product
+    {
+        Code = productRequest.Code,
+        Name = productRequest.Name,
+        Description = productRequest.Description,
+        Category = (Category)category,
+    };
+    context.Products.Add(product);
+
+    return Results.Created("/product" + product.Id, product.Id);
 });
 
-// http://localhost:3000/getproduct?dateStart=2024-10-01&dateEnd=2024-11-22
-app.MapGet("/product", ([FromQuery] string dateStart, [FromQuery] string dateEnd) =>
-{
-    return dateStart + " - " + dateEnd;
-});
-
-// http://localhost:3000/getproduct/123456780?
 app.MapGet("/product/{code}", ([FromRoute] string code) =>
 
 {
@@ -45,13 +37,6 @@ app.MapGet("/product/{code}", ([FromRoute] string code) =>
 }
 
 );
-
-// recebendo do header 
-app.MapGet("/productheader", (HttpRequest request) =>
-{
-    return request.Headers["product-code"].ToString();
-});
-
 app.MapPut("/product", (Product product) =>
 {
 
@@ -76,79 +61,9 @@ if (app.Environment.IsDevelopment())
         return Results.Ok(
             new
             {
-                Connection = configuraton["Database:Connection"],
-                Port = configuraton["Database:Port"]
+                Connection = configuraton["Database:SqlServer"],
             }
                 );
     });
 
 app.Run();
-
-
-public static class ProductRepository
-{
-    public static List<Product>? Products { get; set; } = Products = [];
-
-    public static void Init(IConfiguration configuration)
-    {
-        var products = configuration.GetSection("Products").Get<List<Product>>();
-        Products = products;
-    }
-
-
-    public static void Add(Product product)
-    {
-        Products ??= [];
-        Products.Add(product);
-
-    }
-
-    public static Product GetBy(string code)
-    {
-        return Products.FirstOrDefault(p => p.Code == code);
-    }
-
-    public static void Remove(Product product)
-    {
-        Products.Remove(product);
-    }
-}
-
-public class Category
-{
-    public int Id { get; set; }
-    public string? Name { get; set; }
-}
-
-public class Product
-{
-    public int Id { get; set; }
-    public string? Code { get; set; }
-    public string? Name { get; set; }
-    public string Description { get; set; }
-    public Category Category { get; set; }
-}
-
-
-public class ApplicationDBContext : DbContext
-{
-    public DbSet<Product> Products { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        builder.Entity<Product>()
-        .Property(p => p.Description).HasMaxLength(500).IsRequired(false);
-
-        builder.Entity<Product>()
-        .Property(p => p.Name).HasMaxLength(120).IsRequired();
-
-        builder.Entity<Product>()
-        .Property(p => p.Code).HasMaxLength(20).IsRequired();
-
-
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlServer("Server=localhost;Database=Products;User Id=sa;Password=Bruna#@1;MultipleActiveResultSets=true;Encrypt=YES;TrustServerCertificate=YES");
-
-}

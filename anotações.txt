@@ -24,3 +24,67 @@ dotnet ef migrations remove
 
 // Executa uma migration específica 
 dotnet ef database update 20250101231855_CreateProduct
+
+dotnet tool install --global dotnet-outdated-tool
+// verifica se este atualização de pagotes e atualiza 
+dotnet outdated --upgrade
+
+// Build a aplicação e verifica se tem algo errado.
+dotnet build
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// app.MapGet("/user", () => new { Name = "Ronaldo Silva", Age = 44 });
+
+
+// app.MapGet("/addheader", (HttpResponse response) =>
+// {
+//     response.Headers["Teste"] = "Ronaldo Silva"; // This will replace the value if it already exists
+//     return new { Name = "Ronaldo Silva", Age = 44 };
+// });
+
+
+// // http://localhost:3000/getproduct?dateStart=2024-10-01&dateEnd=2024-11-22
+// app.MapGet("/product", ([FromQuery] string dateStart, [FromQuery] string dateEnd) =>
+// {
+//     return dateStart + " - " + dateEnd;
+// });
+
+// http://localhost:3000/getproduct/123456780?
+// app.MapGet("/product/{code}", ([FromRoute] string code) =>
+
+// {
+//     var product = ProductRepository.GetBy(code);
+
+//     return product is not null
+//         ? Results.Ok(product)
+//         : Results.NotFound();
+// }
+
+// );
+
+// // recebendo do header 
+// app.MapGet("/productheader", (HttpRequest request) =>
+// {
+//     return request.Headers["product-code"].ToString();
+// });

@@ -13,7 +13,7 @@ ProductRepository.Init(configuration);
 app.MapPost("/product", (ProductRequest productRequest, ApplicationDBContext context) =>
 {
 
-    var category = context.Category.Where(c => c.Id == productRequest.CategoryId);
+    var category = context.Categories.Where(c => c.Id == productRequest.CategoryId).First();
     var product = new Product
     {
         Code = productRequest.Code,
@@ -21,8 +21,20 @@ app.MapPost("/product", (ProductRequest productRequest, ApplicationDBContext con
         Description = productRequest.Description,
         Category = (Category)category,
     };
-    context.Products.Add(product);
 
+    if (productRequest.Tags != null)
+    {
+
+        product.Tags = new List<Tag>();
+
+        foreach (var item in productRequest.Tags)
+        {
+            product.Tags.Add(new Tag { Name = item });
+        }
+    }
+
+    context.Products.Add(product);
+    context.SaveChanges();
     return Results.Created("/product" + product.Id, product.Id);
 });
 
